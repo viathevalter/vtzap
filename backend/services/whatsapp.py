@@ -9,8 +9,8 @@ from datetime import datetime
 
 from backend.models import Contact, Template, TemplateType, CalibrationProfile
 
-# Safety buffer
-pyautogui.FAILSAFE = True
+# Safety buffer disables
+pyautogui.FAILSAFE = False
 
 # Point Mapping (Backend Key -> Frontend Name)
 POINT_MAP = {
@@ -43,9 +43,9 @@ class WhatsAppService:
         # Give the user a brief second if they literally just clicked send
         time.sleep(1)
         
-        # Shortcut to move to the LEFT tab in Chrome/Edge.
-        # Ensure the user has the WhatsApp Web tab immediately to the left of the dashboard.
-        pyautogui.hotkey('ctrl', 'shift', 'tab')
+        # Shortcut to move to the FIRST tab in Chrome/Edge (Ctrl + 1).
+        # Ensure the user has the WhatsApp Web tab exactly as the 1st tab.
+        pyautogui.hotkey('ctrl', '1')
         
         # Small wait for the browser to render the tab in focus before clicking
         time.sleep(1)
