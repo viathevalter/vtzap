@@ -33,12 +33,9 @@ class WhatsAppService:
         print(f"[{datetime.now().strftime('%H:%M:%S')}] {contact.phone} - {step}")
 
     def initialize(self, profile: CalibrationProfile):
-        # Open a generic WhatsApp Web tab ONCE at the start,
-        webbrowser.open("https://web.whatsapp.com")
-        
-        # Wait for the initial heavy load of the entire WhatsApp application
-        load_delay = getattr(profile, 'delay', 15)
-        time.sleep(load_delay)
+        # We assume the user already has WhatsApp Web open and focused
+        # We only wait a short time before starting the clicks
+        time.sleep(1)
 
     def _random_sleep(self, min_val: float, max_val: float):
         """Sleeps for a random duration between min_val and max_val to mimic human behavior."""
