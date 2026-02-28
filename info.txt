@@ -1,0 +1,2 @@
+Nome do negócio;Data de Vencimento Atual;VALOR PLANO;Contato: Telefone de trabalho;Link Cobrança
+[{'Nome do negócio': '21922391 LARY SP CB', 'Data de Vencimento Atual': Timestamp('2026-03-03 00:00:00'), 'VALOR PLANO': 35.0, 'Contato: Telefone de trabalho': '11988839295', 'Link Cobrança': 'https://www.asaas.com/i/dpb85snnni1b5ow7'}]

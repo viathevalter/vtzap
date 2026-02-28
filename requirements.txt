@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+pandas
+openpyxl
+pyautogui
+pyperclip
+pydantic
+python-multipart

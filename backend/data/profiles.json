@@ -1,0 +1,108 @@
+[
+  {
+    "id": "default-profile-1772198069334",
+    "name": "Perfil Padr\u00e3o",
+    "resolution": "1920x1080",
+    "delay": 15,
+    "points": [
+      {
+        "id": "p0",
+        "actionName": "Barra de Endere\u00e7o (URL)",
+        "x": 300,
+        "y": 50
+      },
+      {
+        "id": "p1",
+        "actionName": "Buscar Contato",
+        "x": 240,
+        "y": 180
+      },
+      {
+        "id": "p2",
+        "actionName": "Caixa de Mensagem",
+        "x": 650,
+        "y": 950
+      },
+      {
+        "id": "p3",
+        "actionName": "Bot\u00e3o Clipe (Anexar)",
+        "x": 610,
+        "y": 950
+      },
+      {
+        "id": "p4",
+        "actionName": "Op\u00e7\u00e3o Foto/V\u00eddeo",
+        "x": 610,
+        "y": 880
+      },
+      {
+        "id": "p5",
+        "actionName": "Op\u00e7\u00e3o Documento",
+        "x": 610,
+        "y": 820
+      },
+      {
+        "id": "p6",
+        "actionName": "Bot\u00e3o Enviar",
+        "x": 1850,
+        "y": 950
+      }
+    ]
+  },
+  {
+    "id": "profile-1772203539657",
+    "name": "notbook",
+    "resolution": "1920x1080",
+    "delay": 15,
+    "points": [
+      {
+        "id": "p0",
+        "actionName": "Barra de Endere\u00e7o (URL)",
+        "x": 247,
+        "y": 78
+      },
+      {
+        "id": "p1",
+        "actionName": "Buscar Contato",
+        "x": 170,
+        "y": 252
+      },
+      {
+        "id": "p7",
+        "actionName": "Primeiro Resultado da Busca",
+        "x": 195,
+        "y": 520
+      },
+      {
+        "id": "p2",
+        "actionName": "Caixa de Mensagem",
+        "x": 796,
+        "y": 969
+      },
+      {
+        "id": "p3",
+        "actionName": "Bot\u00e3o Clipe (Anexar)",
+        "x": 702,
+        "y": 976
+      },
+      {
+        "id": "p4",
+        "actionName": "Op\u00e7\u00e3o Foto/V\u00eddeo",
+        "x": 692,
+        "y": 558
+      },
+      {
+        "id": "p5",
+        "actionName": "Op\u00e7\u00e3o Documento",
+        "x": 681,
+        "y": 509
+      },
+      {
+        "id": "p6",
+        "actionName": "Bot\u00e3o Enviar",
+        "x": 1870,
+        "y": 970
+      }
+    ]
+  }
+]

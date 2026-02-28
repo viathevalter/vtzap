@@ -1,0 +1,5 @@
+{
+  "name": "Painel Interno WhatsApp",
+  "description": "Painel administrativo para automação de mensagens WhatsApp via PyAutoGUI",
+  "requestFramePermissions": []
+}
