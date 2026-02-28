@@ -34,7 +34,20 @@ class WhatsAppService:
 
     def initialize(self, profile: CalibrationProfile):
         # We assume the user already has WhatsApp Web open and focused
-        # We only wait a short time before starting the clicks
+        # To avoid forcing a reload with webbrowser.open(), we simulate
+        # a browser tab switch (Ctrl + Shift + Tab / Ctrl + PageUp) to 
+        # jump to the adjacent WhatsApp Web tab automatically.
+        
+        self._log(Contact(phone="000"), "Switching to adjacent browser tab...")
+        
+        # Give the user a brief second if they literally just clicked send
+        time.sleep(1)
+        
+        # Shortcut to move to the LEFT tab in Chrome/Edge.
+        # Ensure the user has the WhatsApp Web tab immediately to the left of the dashboard.
+        pyautogui.hotkey('ctrl', 'shift', 'tab')
+        
+        # Small wait for the browser to render the tab in focus before clicking
         time.sleep(1)
 
     def _random_sleep(self, min_val: float, max_val: float):
