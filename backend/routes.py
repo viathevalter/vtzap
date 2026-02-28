@@ -112,7 +112,12 @@ async def process_job(job_id: str, request: SendRequest):
         return
 
     # Bring browser to foreground and initialize
-    whatsapp_service.initialize(profile)
+    try:
+        whatsapp_service.initialize(profile)
+    except Exception as e:
+        print(f"Failed to initialize browser tab: {e}")
+        job.status = JobStatus.STOPPED
+        return
 
     for i, contact in enumerate(job.results):
         if job.status == JobStatus.STOPPED:
