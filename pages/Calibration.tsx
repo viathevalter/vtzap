@@ -8,6 +8,7 @@ const INITIAL_PROFILE: CalibrationProfile = {
   resolution: '1920x1080',
   points: [
     { id: 'p0', actionName: 'Barra de Endereço (URL)', x: 300, y: 50 },
+    { id: 'p0_new', actionName: 'Botão Novo Chat (+)', x: 300, y: 120 },
     { id: 'p1', actionName: 'Buscar Contato', x: 240, y: 180 },
     { id: 'p7', actionName: 'Primeiro Resultado da Busca', x: 240, y: 250 },
     { id: 'p2', actionName: 'Caixa de Mensagem', x: 650, y: 950 },
@@ -28,16 +29,29 @@ const Calibration: React.FC = () => {
     fetch('http://localhost:8000/api/profiles')
       .then(res => res.json())
       .then(data => {
-        if (Array.isArray(data)) {
-          setProfiles(data);
-          if (data.length > 0) {
-            setActiveProfile(data[0]); // Set the first profile as active
-          } else {
-            // If no profiles exist, create a default one
-            const defaultProfile = { ...INITIAL_PROFILE, id: 'default-profile-' + Date.now(), name: 'Perfil Padrão' };
-            setProfiles([defaultProfile]);
-            setActiveProfile(defaultProfile);
-          }
+        if (Array.isArray(data) && data.length > 0) {
+          // Patch existing profiles with any newly added points (like the New Chat + button)
+          const patchedProfiles = data.map(profile => {
+            const patchedPoints = [...profile.points];
+            INITIAL_PROFILE.points.forEach(initPoint => {
+              if (!patchedPoints.find(p => p.id === initPoint.id)) {
+                patchedPoints.push({ ...initPoint, x: null, y: null });
+              }
+            });
+            // Keep points in the order defined by INITIAL_PROFILE
+            const orderedPoints = INITIAL_PROFILE.points.map(ip =>
+              patchedPoints.find(p => p.id === ip.id)!
+            );
+            return { ...profile, points: orderedPoints };
+          });
+
+          setProfiles(patchedProfiles);
+          setActiveProfile(patchedProfiles[0]); // Set the first profile as active
+        } else {
+          // If no profiles exist, create a default one
+          const defaultProfile = { ...INITIAL_PROFILE, id: 'default-profile-' + Date.now(), name: 'Perfil Padrão' };
+          setProfiles([defaultProfile]);
+          setActiveProfile(defaultProfile);
         }
       })
       .catch(err => {

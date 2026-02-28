@@ -15,6 +15,7 @@ pyautogui.FAILSAFE = True
 # Point Mapping (Backend Key -> Frontend Name)
 POINT_MAP = {
     'url': 'Barra de Endereço (URL)',
+    'new_chat': 'Botão Novo Chat (+)',
     'input': 'Caixa de Mensagem',
     'attach': 'Botão Clipe (Anexar)',
     'image': 'Opção Foto/Vídeo',
@@ -63,6 +64,11 @@ class WhatsAppService:
 
     def open_chat(self, phone: str, profile: CalibrationProfile):
         # Instead of reloading the page via URL, we use the WhatsApp Search/New Chat button
+        
+        # Click the new chat button (+) to open the contact drawer
+        self._click_point(profile, 'new_chat')
+        self._random_sleep(0.5, 1.0) # Wait for the drawer to slide open
+        
         self._click_point(profile, 'search')
         self._random_sleep(0.8, 1.3) # Wait for search bar to focus
         
