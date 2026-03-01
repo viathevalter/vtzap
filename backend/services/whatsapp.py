@@ -38,7 +38,7 @@ class WhatsAppService:
         # a browser tab switch (Ctrl + Shift + Tab / Ctrl + PageUp) to 
         # jump to the adjacent WhatsApp Web tab automatically.
         
-        self._log(Contact(phone="000"), "Switching to adjacent browser tab...")
+        self._log(Contact(name="System", phone="000"), "Switching to adjacent browser tab...")
         
         # Give the user a brief second if they literally just clicked send
         time.sleep(1)
