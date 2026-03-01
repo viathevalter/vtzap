@@ -22,7 +22,7 @@ class JobStatus(str, Enum):
     SCHEDULED = "scheduled"
 
 class Contact(BaseModel):
-    name: str
+    name: Optional[str] = "Unknown"
     phone: str
     status: ContactStatus = ContactStatus.PENDING
     error: Optional[str] = None
