@@ -58,7 +58,7 @@ const SendWhatsApp: React.FC = () => {
   const [manualAttachmentPdf, setManualAttachmentPdf] = useState('');
 
   // Cobranca State
-  const [cobrancaMessage, setCobrancaMessage] = useState('Olá {nome}, identificamos que a sua fatura no valor de R$ {valor} vence no dia {vencimento}. Para realizar o pagamento acesse: {link}');
+  const [cobrancaMessage, setCobrancaMessage] = useState('OLÁ!\nSeu acesso IPTV vence  dia {vencimento}, no valor de R$ {valor}.Você pode realizar o pagamento por PIX/BOLETO segue o link {link}');
   const [selectedDueDate, setSelectedDueDate] = useState<string>('all');
   const [minDelay, setMinDelay] = useState<number>(10);
   const [maxDelay, setMaxDelay] = useState<number>(20);
@@ -498,7 +498,7 @@ const SendWhatsApp: React.FC = () => {
                   value={cobrancaMessage}
                   onChange={(e) => setCobrancaMessage(e.target.value)}
                 />
-                <p className="text-xs text-slate-500 mt-2">Variáveis Suportadas: <code className="bg-slate-100 px-1 py-0.5 rounded text-blue-600 font-bold">{'{nome}'}</code>, <code className="bg-slate-100 px-1 py-0.5 rounded text-red-600 font-bold">{'{vencimento}'}</code>, <code className="bg-slate-100 px-1 py-0.5 rounded text-green-600 font-bold">{'{valor}'}</code>, <code className="bg-slate-100 px-1 py-0.5 rounded text-purple-600 font-bold">{'{link}'}</code></p>
+                <p className="text-xs text-slate-500 mt-2">Variáveis Suportadas: <code className="bg-slate-100 px-1 py-0.5 rounded text-red-600 font-bold">{'{vencimento}'}</code>, <code className="bg-slate-100 px-1 py-0.5 rounded text-green-600 font-bold">{'{valor}'}</code>, <code className="bg-slate-100 px-1 py-0.5 rounded text-purple-600 font-bold">{'{link}'}</code></p>
               </div>
 
               <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-100">
