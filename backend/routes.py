@@ -3,6 +3,7 @@ from typing import List, Optional
 import pandas as pd
 import json
 import os
+import sys
 import time
 import asyncio
 import pyautogui
@@ -142,6 +143,16 @@ async def process_job(job_id: str, request: SendRequest):
         await asyncio.sleep(random.randint(min_d, max_d))
 
     job.status = JobStatus.COMPLETED
+    
+    # Switch back to the Control Panel tab/window at the end
+    await asyncio.sleep(1)
+    try:
+        if sys.platform == "darwin":
+            pyautogui.hotkey('command', 'tab')
+        else:
+            pyautogui.hotkey('alt', 'tab')
+    except Exception as e:
+        print(f"Failed to switch back to panel: {e}")
 
 @router.post("/send")
 async def start_sending(request: SendRequest, background_tasks: BackgroundTasks):

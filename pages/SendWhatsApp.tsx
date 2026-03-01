@@ -94,7 +94,17 @@ const SendWhatsApp: React.FC = () => {
         .then(res => res.json())
         .then(data => {
           if (Array.isArray(data)) {
+            // Update scheduled list
             setScheduledJobs(data.filter((j: any) => j.status === 'scheduled'));
+
+            // If we are waiting for a job to start, and one just started running, lock onto it
+            if (!jobId) {
+              const activeJob = data.find((j: any) => j.status === 'running');
+              if (activeJob) {
+                setJobId(activeJob.id);
+                setIsSending(true);
+              }
+            }
           }
         })
         .catch(err => console.error(err));
@@ -102,7 +112,7 @@ const SendWhatsApp: React.FC = () => {
     fetchScheduled();
     const interval = setInterval(fetchScheduled, 5000);
     return () => clearInterval(interval);
-  }, []);
+  }, [jobId]);
 
   // Poll Job Status
   React.useEffect(() => {
