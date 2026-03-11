@@ -157,12 +157,18 @@ const SendWhatsApp: React.FC = () => {
         method: 'POST',
         body: formData
       });
+      
+      if (!res.ok) {
+        const errData = await res.json().catch(() => null);
+        throw new Error(errData?.detail || `Erro no servidor: ${res.status}`);
+      }
+      
       const data = await res.json();
       setContacts(data);
       setContactsFileName(file.name + ` (${data.length} contatos)`);
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      alert('Erro ao processar arquivo');
+      alert('Erro ao processar arquivo: ' + (error.message || 'Desconhecido'));
       setContactsFile(null);
       setContactsFileName(null);
     } finally {

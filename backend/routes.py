@@ -37,10 +37,13 @@ def save_json(path, data):
 @router.post("/preview", response_model=List[Contact])
 async def preview_contacts(file: UploadFile = File(...)):
     try:
+        import io
+        contents = await file.read()
+        
         if file.filename.endswith('.csv'):
-            df = pd.read_csv(file.file)
+            df = pd.read_csv(io.BytesIO(contents))
         elif file.filename.endswith(('.xls', '.xlsx')):
-            df = pd.read_excel(file.file)
+            df = pd.read_excel(io.BytesIO(contents))
         else:
             raise HTTPException(status_code=400, detail="Invalid file format")
             
@@ -74,6 +77,9 @@ async def preview_contacts(file: UploadFile = File(...)):
             
             # Clean phone number (remove non-digits)
             # Remove '+', '-', ' ', '(', ')'
+            if phone_val.endswith('.0'):
+                phone_val = phone_val[:-2]
+                
             clean_phone = ''.join(filter(str.isdigit, phone_val))
 
             if clean_phone: # only add if there is a phone number
