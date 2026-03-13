@@ -42,6 +42,7 @@ class WhatsAppService:
         
         self._log(Contact(name="System", phone="000"), "Gerando Gabarito de Tela Vazia (Linha Vertical)...")
         # Prepara a tela vazia
+        self._click_point(profile, 'new_chat')
         self._click_point(profile, 'clear_search')
         self._click_point(profile, 'search')
         self._copy_paste("0000000000000")
@@ -110,6 +111,7 @@ class WhatsAppService:
         scan_start_y = search_point.y + 45
         
         # 1. Limpa, Foca e Cola Número Real Diferenciado (O Gabarito já está na RAM desde Initialize)
+        self._click_point(profile, 'new_chat')
         self._click_point(profile, 'clear_search')
         self._click_point(profile, 'search')
         self._copy_paste(phone)
@@ -144,11 +146,10 @@ class WhatsAppService:
                         contact_found = True
                         break
                         
-            # Cleanup debug logs for production
-            # if not debug_log_once:
-            #    with open("backend/data/vt_log.txt", "a", encoding="utf-8") as f:
-            #        f.write(f"[{datetime.now().strftime('%H:%M:%S')}] Píxel Debug Num {phone} | Máx Diferença: {max_diff} | Pixels Diferentes: {total_diffs} | Baseline size: {len(safe_baseline)} | Cur size: {len(current_colors)}\n")
-            #    debug_log_once = True
+            # Log to terminal for debugging Y-coordinate shift
+            if not debug_log_once:
+                print(f"[{datetime.now().strftime('%H:%M:%S')}] Píxel Debug Num {phone} | Máx Diferença: {max_diff} | Pixels Diferentes: {total_diffs} | Baseline size: {len(safe_baseline)} | Cur size: {len(current_colors)}")
+                debug_log_once = True
             
             if contact_found:
                 break
