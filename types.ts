@@ -12,6 +12,7 @@ export interface LogEntry {
   status: 'success' | 'failed' | 'pending';
   errorDetails?: string;
   timestamp: string;
+  raw_data?: any;
 }
 
 export interface Template {

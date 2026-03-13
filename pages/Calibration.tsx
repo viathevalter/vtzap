@@ -10,6 +10,7 @@ const INITIAL_PROFILE: CalibrationProfile = {
     { id: 'p0', actionName: 'Barra de Endereço (URL)', x: 300, y: 50 },
     { id: 'p0_new', actionName: 'Botão Novo Chat (+)', x: 300, y: 120 },
     { id: 'p1', actionName: 'Buscar Contato', x: 240, y: 180 },
+    { id: 'p1_clear', actionName: 'Botão Limpar Busca (X)', x: 340, y: 180 },
     { id: 'p7', actionName: 'Primeiro Resultado da Busca', x: 240, y: 250 },
     { id: 'p2', actionName: 'Caixa de Mensagem', x: 650, y: 950 },
     { id: 'p3', actionName: 'Botão Clipe (Anexar)', x: 610, y: 950 },
@@ -30,19 +31,21 @@ const Calibration: React.FC = () => {
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data) && data.length > 0) {
-          // Patch existing profiles with any newly added points (like the New Chat + button)
+          // Patch existing profiles with any newly added points (like the New Chat + button or Clear X)
           const patchedProfiles = data.map(profile => {
-            const patchedPoints = [...profile.points];
-            INITIAL_PROFILE.points.forEach(initPoint => {
-              if (!patchedPoints.find(p => p.id === initPoint.id)) {
-                patchedPoints.push({ ...initPoint, x: null, y: null });
+            // Start with all points from INITIAL_PROFILE to guarantee order and completeness
+            const mergedPoints = INITIAL_PROFILE.points.map(initPoint => {
+              // Find if this point already existed in the saved profile
+              const savedPoint = profile.points.find((p: any) => p.id === initPoint.id);
+              if (savedPoint) {
+                // Keep the saved coordinates but update everything else (like actionName changes)
+                return { ...initPoint, x: savedPoint.x, y: savedPoint.y };
+              } else {
+                // It's a brand new point, initialize with nulls
+                return { ...initPoint, x: null, y: null };
               }
             });
-            // Keep points in the order defined by INITIAL_PROFILE
-            const orderedPoints = INITIAL_PROFILE.points.map(ip =>
-              patchedPoints.find(p => p.id === ip.id)!
-            );
-            return { ...profile, points: orderedPoints };
+            return { ...profile, points: mergedPoints };
           });
 
           setProfiles(patchedProfiles);

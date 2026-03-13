@@ -15,9 +15,11 @@ import {
   FileBox,
   Layout,
   MessageSquarePlus,
-  X
+  X,
+  Download
 } from 'lucide-react';
 import { LogEntry, Template, TemplateType } from '../types';
+import * as XLSX from 'xlsx';
 
 // Mock Data
 const MOCK_LOGS: LogEntry[] = [
@@ -58,7 +60,7 @@ const SendWhatsApp: React.FC = () => {
   const [manualAttachmentPdf, setManualAttachmentPdf] = useState('');
 
   // Cobranca State
-  const [cobrancaMessage, setCobrancaMessage] = useState('OLÁ!\nSeu acesso IPTV vence  dia {vencimento}, no valor de R$ {valor}.Você pode realizar o pagamento por PIX/BOLETO segue o link {link}');
+  const [cobrancaMessage, setCobrancaMessage] = useState('OLÁ! {nome}\nSeu acesso IPTV vence  dia {vencimento}, no valor de R$ {valor}.Você pode realizar o pagamento por PIX/BOLETO segue o link {link}');
   const [selectedDueDate, setSelectedDueDate] = useState<string>('all');
   const [minDelay, setMinDelay] = useState<number>(10);
   const [maxDelay, setMaxDelay] = useState<number>(20);
@@ -128,7 +130,8 @@ const SendWhatsApp: React.FC = () => {
               phone: r.phone,
               status: r.status,
               errorDetails: r.error,
-              timestamp: new Date().toLocaleTimeString()
+              timestamp: new Date().toLocaleTimeString(),
+              raw_data: r.raw_data
             })));
             if (data.status === 'completed' || data.status === 'stopped') {
               setIsSending(false);
@@ -285,6 +288,29 @@ const SendWhatsApp: React.FC = () => {
     } catch (err) {
       console.error(err);
     }
+  };
+
+  const handleDownloadReport = () => {
+    if (logs.length === 0) return;
+
+    const data = logs.map(log => {
+      // Começar com os dados brutos (preservando todas as colunas originais)
+      const row = { ...(log.raw_data || { Nome: log.name, Telefone: log.phone }) };
+      
+      // Adicionar colunas de controle no final (se já existirem na original, serão recriadas/sobrescritas)
+      row['Status_Envio'] = log.status === 'success' ? 'Enviado' : (log.status === 'failed' ? 'Falha' : 'Pendente');
+      row['Erro_Detalhe'] = log.errorDetails || '';
+      row['Hora_Envio'] = log.timestamp || '';
+      
+      return row;
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Relatorio');
+
+    const dateStr = new Date().toLocaleString().replace(/[/: ]/g, '_');
+    XLSX.writeFile(workbook, `Relatorio_Envios_${dateStr}.xlsx`);
   };
 
   // Computed Validation
@@ -504,7 +530,7 @@ const SendWhatsApp: React.FC = () => {
                   value={cobrancaMessage}
                   onChange={(e) => setCobrancaMessage(e.target.value)}
                 />
-                <p className="text-xs text-slate-500 mt-2">Variáveis Suportadas: <code className="bg-slate-100 px-1 py-0.5 rounded text-red-600 font-bold">{'{vencimento}'}</code>, <code className="bg-slate-100 px-1 py-0.5 rounded text-green-600 font-bold">{'{valor}'}</code>, <code className="bg-slate-100 px-1 py-0.5 rounded text-purple-600 font-bold">{'{link}'}</code></p>
+                <p className="text-xs text-slate-500 mt-2">Variáveis Suportadas: <code className="bg-slate-100 px-1 py-0.5 rounded text-blue-600 font-bold">{'{nome}'}</code>, <code className="bg-slate-100 px-1 py-0.5 rounded text-red-600 font-bold">{'{vencimento}'}</code>, <code className="bg-slate-100 px-1 py-0.5 rounded text-green-600 font-bold">{'{valor}'}</code>, <code className="bg-slate-100 px-1 py-0.5 rounded text-purple-600 font-bold">{'{link}'}</code></p>
               </div>
 
               <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-100">
@@ -652,6 +678,16 @@ const SendWhatsApp: React.FC = () => {
               <div className="text-xs text-red-500 text-center font-medium bg-red-50 p-2 rounded border border-red-100">
                 ⚠️ Template exige anexo obrigatório. Verifique a configuração.
               </div>
+            )}
+
+            {!isSending && logs.length > 0 && (
+              <button 
+                onClick={handleDownloadReport}
+                className="w-full flex items-center justify-center gap-2 border border-green-200 text-green-600 py-3 rounded-lg font-medium hover:bg-green-50 transition-colors"
+              >
+                <Download size={18} />
+                Baixar Relatório Excel
+              </button>
             )}
 
             <button className="w-full flex items-center justify-center gap-2 border border-orange-200 text-orange-600 py-3 rounded-lg font-medium hover:bg-orange-50 transition-colors">

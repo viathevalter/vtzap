@@ -22,36 +22,60 @@ POINT_MAP = {
     'document': 'Opção Documento',
     'send': 'Botão Enviar',
     'search': 'Buscar Contato',
+    'clear_search': 'Botão Limpar Busca (X)',
     'first_result': 'Primeiro Resultado da Busca'
 }
 
 class WhatsAppService:
     def __init__(self):
         self.is_running = False
+        self.baseline_colors = None
 
     def _log(self, contact: Contact, step: str):
         print(f"[{datetime.now().strftime('%H:%M:%S')}] {contact.phone} - {step}")
 
     def initialize(self, profile: CalibrationProfile):
-        # We assume the user already has WhatsApp Web open and focused
-        # To avoid forcing a reload with webbrowser.open(), we simulate
-        # a browser tab switch (Ctrl + Shift + Tab / Ctrl + PageUp) to 
-        # jump to the adjacent WhatsApp Web tab automatically.
-        
         self._log(Contact(name="System", phone="000"), "Switching to adjacent browser tab...")
-        
-        # Give the user a brief second if they literally just clicked send
         time.sleep(1)
-        
-        # Shortcut to move to the FIRST tab in Chrome/Edge (Ctrl + 1).
-        # Ensure the user has the WhatsApp Web tab exactly as the 1st tab.
         pyautogui.hotkey('ctrl', '1')
-        
-        # Small wait for the browser to render the tab in focus before clicking
         time.sleep(1)
+        
+        self._log(Contact(name="System", phone="000"), "Gerando Gabarito de Tela Vazia (Linha Vertical)...")
+        # Prepara a tela vazia
+        self._click_point(profile, 'clear_search')
+        self._click_point(profile, 'search')
+        self._copy_paste("0000000000000")
+        self._random_sleep(1.0, 1.5) # Aguarda painel "Nenhum resultado"
+        
+        search_point = next((p for p in profile.points if p.actionName == POINT_MAP['search']), None)
+        fr_point = next((p for p in profile.points if p.actionName == POINT_MAP['first_result']), None)
+        
+        if search_point and fr_point:
+            self.baseline_colors = self._scan_vertical_line(fr_point.x, search_point.y + 45, length=300, step=3)
+        else:
+            self.baseline_colors = [(255,255,255) for _ in range(100)]
+            
+        self._click_point(profile, 'clear_search')
+        self._random_sleep(0.3, 0.5)
+
+    def _scan_vertical_line(self, x_pos, start_y, length=300, step=3):
+        import ctypes
+        hdc = ctypes.windll.user32.GetWindowDC(0)
+        colors = []
+        try:
+            for dy in range(0, length, step):
+                y = int(start_y + dy)
+                if x_pos > 0 and y > 0:
+                    color = ctypes.windll.gdi32.GetPixel(hdc, x_pos, y)
+                    r = color & 0xFF
+                    g = (color >> 8) & 0xFF
+                    b = (color >> 16) & 0xFF
+                    colors.append((r, g, b))
+        finally:
+            ctypes.windll.user32.ReleaseDC(0, hdc)
+        return colors
 
     def _random_sleep(self, min_val: float, max_val: float):
-        """Sleeps for a random duration between min_val and max_val to mimic human behavior."""
         time.sleep(random.uniform(min_val, max_val))
 
     def _click_point(self, profile: CalibrationProfile, point_key: str):
@@ -63,7 +87,9 @@ class WhatsAppService:
         if not point or point.x is None or point.y is None:
             raise Exception(f"Calibration point missing: {point_key} ('{action_name}')")
             
-        pyautogui.click(point.x, point.y)
+        pyautogui.moveTo(point.x, point.y)
+        self._random_sleep(0.3, 0.6)
+        pyautogui.click()
         self._random_sleep(0.4, 0.8)
 
     def _copy_paste(self, text: str):
@@ -73,23 +99,76 @@ class WhatsAppService:
         self._random_sleep(0.2, 0.5)
 
     def open_chat(self, phone: str, profile: CalibrationProfile):
-        # Instead of reloading the page via URL, we use the WhatsApp Search/New Chat button
+        fr_point = next((p for p in profile.points if p.actionName == POINT_MAP['first_result']), None)
+        search_point = next((p for p in profile.points if p.actionName == POINT_MAP['search']), None)
         
-        # Click the new chat button (+) to open the contact drawer
-        self._click_point(profile, 'new_chat')
-        self._random_sleep(0.5, 1.0) # Wait for the drawer to slide open
+        if not fr_point or not search_point:
+            raise Exception("Pontos de calibração faltando.")
         
+        import time
+        scan_x = fr_point.x
+        scan_start_y = search_point.y + 45
+        
+        # 1. Limpa, Foca e Cola Número Real Diferenciado (O Gabarito já está na RAM desde Initialize)
+        self._click_point(profile, 'clear_search')
         self._click_point(profile, 'search')
-        self._random_sleep(0.8, 1.3) # Wait for search bar to focus
-        
         self._copy_paste(phone)
+            
+        contact_found = False
+        start_wait = time.time()
+        dynamic_click_y = None
         
-        # We need a small delay here for WhatsApp to query the number locally and show the result
-        self._random_sleep(1.8, 2.5) 
+        # Cria array base seguro
+        safe_baseline = self.baseline_colors if hasattr(self, 'baseline_colors') and self.baseline_colors else [(255,255,255) for _ in range(100)]
+        debug_log_once = False
         
-        # Click the first search result explicitly instead of just pressing enter
-        self._click_point(profile, 'first_result')
-        self._random_sleep(0.8, 1.2) # Short wait for chat pane to open
+        while time.time() - start_wait < 12.0:
+            self._random_sleep(0.8, 1.2)
+            current_colors = self._scan_vertical_line(scan_x, scan_start_y, length=300, step=3)
+            
+            total_diffs = 0
+            max_diff = 0
+            
+            for c1, c2 in zip(safe_baseline, current_colors):
+                dr = abs(c1[0] - c2[0])
+                dg = abs(c1[1] - c2[1])
+                db = abs(c1[2] - c2[2])
+                
+                diff = max(dr, dg, db)
+                if diff > max_diff:
+                    max_diff = diff
+                    
+                if diff > 20:
+                    total_diffs += 1
+                    if total_diffs >= 4:
+                        contact_found = True
+                        break
+                        
+            # Cleanup debug logs for production
+            # if not debug_log_once:
+            #    with open("backend/data/vt_log.txt", "a", encoding="utf-8") as f:
+            #        f.write(f"[{datetime.now().strftime('%H:%M:%S')}] Píxel Debug Num {phone} | Máx Diferença: {max_diff} | Pixels Diferentes: {total_diffs} | Baseline size: {len(safe_baseline)} | Cur size: {len(current_colors)}\n")
+            #    debug_log_once = True
+            
+            if contact_found:
+                break
+                
+        if not contact_found:
+            self._log(Contact(name="System", phone=phone), f"Número não encontrado (Max diff visual: {max_diff}).")
+            try:
+                self._click_point(profile, 'clear_search')
+                self._click_point(profile, 'search')
+                pyautogui.press('esc')
+                self._random_sleep(0.4, 0.7)
+            except Exception as e:
+                pass
+            raise Exception("Sem WhatsApp (Não encontrado na busca)")
+        
+        self._log(Contact(name="System", phone=phone), f"Contato vivo detectado! (Píxels alterados: {total_diffs})")
+        try:
+            self._click_point(profile, 'first_result')
+        except Exception as e:
+            self._log(Contact(name="System", phone=phone), f"Erro ao tentar clicar no Contato.")
 
     def send_text_message(self, text: str, profile: CalibrationProfile):
         # Click input box to ensure focus? Usually URL opens with focus.
@@ -187,6 +266,9 @@ class WhatsAppService:
             self._log(contact, "Success")
             return True
         except Exception as e:
+            err_msg = f"[{datetime.now().strftime('%H:%M:%S')}] FATAL ERROR NO CONTATO {contact.phone}: {str(e)}\n"
+            print(err_msg.strip())
+            with open("backend/data/vt_log.txt", "a", encoding="utf-8") as f:
+                f.write(err_msg)
             self._log(contact, f"Error: {e}")
-            print(f"Failed to send to {contact.name}: {e}")
             return False

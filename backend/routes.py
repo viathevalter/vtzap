@@ -65,15 +65,17 @@ async def preview_contacts(file: UploadFile = File(...)):
         if not phone_col and len(df.columns) > 1:
             phone_col = df.columns[1]
 
+        df = df.where(pd.notnull(df), None)
+
         contacts = []
         for _, row in df.iterrows():
-            name_val = str(row[name_col]) if name_col and pd.notna(row[name_col]) else "Unknown"
+            name_val = str(row[name_col]) if name_col and row[name_col] is not None else "Unknown"
             
-            phone_val = str(row[phone_col]) if phone_col and pd.notna(row[phone_col]) else ""
+            phone_val = str(row[phone_col]) if phone_col and row[phone_col] is not None else ""
             
-            due_date_val = str(row[due_date_col]) if due_date_col and pd.notna(row[due_date_col]) else None
-            value_val = str(row[value_col]) if value_col and pd.notna(row[value_col]) else None
-            link_val = str(row[link_col]) if link_col and pd.notna(row[link_col]) else None
+            due_date_val = str(row[due_date_col]) if due_date_col and row[due_date_col] is not None else None
+            value_val = str(row[value_col]) if value_col and row[value_col] is not None else None
+            link_val = str(row[link_col]) if link_col and row[link_col] is not None else None
             
             # Clean phone number (remove non-digits)
             # Remove '+', '-', ' ', '(', ')'
@@ -93,7 +95,8 @@ async def preview_contacts(file: UploadFile = File(...)):
                     status=ContactStatus.PENDING,
                     due_date=due_date_val,
                     value=value_val,
-                    link=link_val
+                    link=link_val,
+                    raw_data=row.to_dict()
                 ))
         return contacts
     except Exception as e:

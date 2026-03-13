@@ -29,6 +29,7 @@ class Contact(BaseModel):
     due_date: Optional[str] = None
     value: Optional[str] = None
     link: Optional[str] = None
+    raw_data: Optional[dict] = None
 
 class Template(BaseModel):
     id: str
