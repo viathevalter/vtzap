@@ -218,6 +218,7 @@ class WhatsAppService:
             if contact.due_date: msg_content = msg_content.replace("{vencimento}", contact.due_date)
             if contact.value: msg_content = msg_content.replace("{valor}", contact.value)
             if contact.link: msg_content = msg_content.replace("{link}", contact.link)
+            if contact.passaporte: msg_content = msg_content.replace("{passaporte}", contact.passaporte)
             
             self._log(contact, "Opening Chat")
             self.open_chat(phone, profile)

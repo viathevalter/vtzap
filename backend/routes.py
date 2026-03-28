@@ -51,13 +51,14 @@ async def preview_contacts(file: UploadFile = File(...)):
         df.columns = [str(c).strip().lower() for c in df.columns]
         
         # Try to find name column
-        name_col = next((c for c in df.columns if c in ['nome', 'name', 'contato', 'cliente', '0', 'nome do negócio']), None)
+        name_col = next((c for c in df.columns if c in ['nome', 'nome completo', 'name', 'contato', 'cliente', '0', 'nome do negócio']), None)
         # Try to find phone column
         phone_col = next((c for c in df.columns if c in ['telefone', 'phone', 'celular', 'numero', 'whatsapp', 'zap', '1', 'contato: telefone de trabalho']), None)
         # Try to find specific billing columns
         due_date_col = next((c for c in df.columns if c in ['data de vencimento', 'vencimento', 'data de vencimento atual']), None)
         value_col = next((c for c in df.columns if c in ['valor', 'valor vencido', 'montante']), None)
         link_col = next((c for c in df.columns if c in ['link', 'link cobrança', 'link de cobrança']), None)
+        passaporte_col = next((c for c in df.columns if c in ['passaporte', 'contraseña', 'documento', 'rut', 'dni', 'id']), None)
         
         # Fallback to positional columns if not found
         if not name_col and len(df.columns) > 0:
@@ -76,6 +77,7 @@ async def preview_contacts(file: UploadFile = File(...)):
             due_date_val = str(row[due_date_col]) if due_date_col and row[due_date_col] is not None else None
             value_val = str(row[value_col]) if value_col and row[value_col] is not None else None
             link_val = str(row[link_col]) if link_col and row[link_col] is not None else None
+            passaporte_val = str(row[passaporte_col]) if passaporte_col and row[passaporte_col] is not None else None
             
             # Clean phone number (remove non-digits)
             # Remove '+', '-', ' ', '(', ')'
@@ -96,6 +98,7 @@ async def preview_contacts(file: UploadFile = File(...)):
                     due_date=due_date_val,
                     value=value_val,
                     link=link_val,
+                    passaporte=passaporte_val,
                     raw_data=row.to_dict()
                 ))
         return contacts
